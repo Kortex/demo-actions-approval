@@ -1,0 +1,22 @@
+{
+  "name": "demo-actions-approval",
+  "version": "1.0.0",
+  "description": "A simple sample project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kortex/demo-actions-approval.git"
+  },
+  "author": "Aris Kourtesas",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kortex/demo-actions-approval/issues"
+  },
+  "homepage": "https://github.com/Kortex/demo-actions-approval#readme",
+  "dependencies": {
+    "http-server": "^13.0.2"
+  }
+}
