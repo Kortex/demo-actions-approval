@@ -12,6 +12,9 @@ jobs:
     environment: 'dev'
     steps:
 
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -40,6 +43,9 @@ jobs:
     needs: 'build-deploy-dev'
     steps:
 
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -67,6 +73,9 @@ jobs:
     environment: 'prod'
     needs: [ build-deploy-dev, build-deploy-staging ]
     steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
