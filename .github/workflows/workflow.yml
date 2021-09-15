@@ -1,0 +1,90 @@
+name: GitHub Actions Approval Demo
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-deploy-dev:
+    name: Build and deploy dev
+    runs-on: ubuntu-20.04
+    environment: 'dev'
+    steps:
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Login to AWS ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr
+
+      - name: Build and push image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPO_NAME }}
+          IMAGE_TAG: latest
+        run: |
+          image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $image .
+          docker push $image
+
+  build-deploy-staging:
+    name: Build and deploy staging
+    runs-on: ubuntu-20.04
+    environment: 'staging'
+    needs: 'build-deploy-dev'
+    steps:
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Login to AWS ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr
+
+      - name: Build and push image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPO_NAME }}
+          IMAGE_TAG: latest
+        run: |
+          image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $image .
+          docker push $image
+
+  build-deploy-prod:
+    name: Build and deploy production
+    runs-on: ubuntu-20.04
+    environment: 'prod'
+    needs: [ build-deploy-dev, build-deploy-staging ]
+    steps:
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Login to AWS ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr
+
+      - name: Build and push image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPO_NAME }}
+          IMAGE_TAG: latest
+        run: |
+          image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $image .
+          docker push $image
