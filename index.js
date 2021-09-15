@@ -11,5 +11,5 @@ server.listen(port, error => {
     if (error) {
         console.log('An error has occurred while handling a request', error)
     }
-    console.log(`server is listening on ${port}`)
+    console.log(`Server is listening on ${port}`)
 })
