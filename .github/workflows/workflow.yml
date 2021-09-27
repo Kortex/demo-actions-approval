@@ -8,9 +8,13 @@ on:
 
 jobs:
   build-deploy-dev:
-    name: Build and deploy ${GITHUB_REF##*/}
+    name: Build and deploy
     runs-on: ubuntu-20.04
     environment: 'dev'
+    strategy:
+      max-parallel: 1
+      matrix:
+        stage: [ '${GITHUB_REF##*/}' ]
     steps:
 
       - name: Checkout code
