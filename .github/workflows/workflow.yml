@@ -5,12 +5,10 @@ on:
       - main
   pull_request:
 
-env:
-    BRANCH_NAME: ${GITHUB_REF##*/}
 
 jobs:
   build-deploy-dev:
-    name: Build and deploy dev
+    name: Build and deploy ${GITHUB_REF##*/}
     runs-on: ubuntu-20.04
     environment: 'dev'
     steps:
@@ -36,6 +34,7 @@ jobs:
           IMAGE_TAG: dev
         run: |
           echo $BRANCH_NAME
+          echo ${GITHUB_REF##*/}
           image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker build -t $image .
           docker push $image
