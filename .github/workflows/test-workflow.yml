@@ -1,0 +1,27 @@
+name: Branch naming test
+
+on:
+  push:
+
+jobs:
+  limit-to-certain-branch:
+    runs-on: ubuntu-20.04
+
+    defaults:
+      run:
+        shell: bash
+
+    strategy:
+      matrix:
+        branch: [ dev, test, prod ]
+
+    steps:
+      - name: Echo stage name
+        run: echo "Running for ${{ matrix.branch }}"
+
+      - name: Echo branch name
+        run: echo ${GITHUB_REF##*/}
+
+      - name: Do important stuff only for branch
+        run: echo "Something very important here"
+        if: github.ref == 'refs/heads/stage/${{ matrix.branch }}' && github.event_name == 'push'
