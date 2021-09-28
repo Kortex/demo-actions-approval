@@ -3,13 +3,14 @@ name: Branch naming test
 on:
   push:
     branches:
+      - stage/dev
       - stage/test
   pull_request:
 
 jobs:
   limit-to-certain-branch:
     runs-on: ubuntu-20.04
-
+    name: "My staged jobs"
     defaults:
       run:
         shell: bash
@@ -17,6 +18,7 @@ jobs:
     strategy:
       matrix:
         branch: [ dev, test, prod ]
+      max-parallel: 1
 
     steps:
       - name: Echo stage name
