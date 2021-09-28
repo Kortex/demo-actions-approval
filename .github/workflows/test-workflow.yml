@@ -9,7 +9,7 @@ on:
 jobs:
   limit-to-certain-branch:
     runs-on: ubuntu-20.04
-
+    name: "My staged jobs"
     defaults:
       run:
         shell: bash
