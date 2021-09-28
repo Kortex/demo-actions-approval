@@ -26,6 +26,7 @@ jobs:
         run: echo ${GITHUB_REF##*/}
 
       - name: Echo calc branch
+        run: echo ${{ env.CALC_BRANCH }}
 
       - name: Do important stuff only for branch
         run: echo "Something very important here"
