@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         branch: [ dev, test, prod ]
+      max-parallel: 1
 
     steps:
       - name: Echo stage name
