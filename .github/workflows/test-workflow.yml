@@ -19,9 +19,14 @@ jobs:
       - name: Echo stage name
         run: echo "Running for ${{ matrix.branch }}"
 
+      - name: Calc branch name
+        run: echo "CALC_BRANCH=refs/heads/stage/${{ matrix.branch }}" >> "$GITHUB_ENV"
+
       - name: Echo branch name
         run: echo ${GITHUB_REF##*/}
 
+      - name: Echo calc branch
+
       - name: Do important stuff only for branch
         run: echo "Something very important here"
-        if: github.ref == 'refs/heads/stage/${{ matrix.branch }}' && github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == env.CALC_BRANCH
