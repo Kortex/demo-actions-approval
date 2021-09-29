@@ -54,5 +54,5 @@ jobs:
 #        run: echo ${{ env.CALC_BRANCH }}
 
       - name: Do important stuff only for branch
-        run: echo "Something very important here {{ env.STAGE }}"
+        run: echo "Something very important here ${{ env.STAGE }}"
         #if: github.event_name == 'push' && github.ref == github.base_ref
