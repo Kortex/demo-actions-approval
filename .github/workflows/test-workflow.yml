@@ -29,6 +29,9 @@ jobs:
       - name: Echo branch name
         run: echo ${GITHUB_REF##*/}
 
+      - name: Echo GITHUB Ref
+        run: echo $GITHUB_REF
+
       - name: Echo Branch Base
         run: echo $GITHUB_BASE_REF
 
