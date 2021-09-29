@@ -33,10 +33,10 @@ jobs:
         run: echo $GITHUB_BASE_REF
 
       - name: Echo Head Base
-        run: echo $GITHUB_BASE_REF
+        run: echo $GITHUB_HEAD_REF
 
-      - name: Echo calc branch
-        run: echo ${{ env.CALC_BRANCH }}
+#      - name: Echo calc branch
+#        run: echo ${{ env.CALC_BRANCH }}
 
       - name: Do important stuff only for branch
         run: echo "Something very important here"
