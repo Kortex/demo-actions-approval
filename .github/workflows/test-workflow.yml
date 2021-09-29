@@ -16,13 +16,7 @@ jobs:
       run:
         shell: bash
 
-#    strategy:
-#      matrix:
-#        branch: [ dev, test, prod ]
-#      max-parallel: 1
     steps:
-      - name: Echo stage name
-        run: echo "Running for ${{ matrix.branch }}"
 
       - name: Calc branch name
         run: echo "CALC_BRANCH=refs/heads/stage/${{ matrix.branch }}" >> "$GITHUB_ENV"
@@ -43,9 +37,22 @@ jobs:
           echo $GITHUB_HEAD_REF
           echo ${GITHUB_HEAD_REF##*/}
 
+      - name: Figure out stage name
+        run: |
+          stage=
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+            stage=${GITHUB_BASE_REF##*/}
+          elif [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+            stage=${GITHUB_REF##*/}
+          else
+            echo "Cannot figure out stage"
+            exit 2
+          fi
+          echo $stage
+          echo "STAGE=$stage" >> "$GITHUB_ENV"
 #      - name: Echo calc branch
 #        run: echo ${{ env.CALC_BRANCH }}
 
       - name: Do important stuff only for branch
-        run: echo "Something very important here"
-        if: github.event_name == 'push' && github.ref == github.base_ref
+        run: echo "Something very important here ${{ env.STAGE }}"
+        #if: github.event_name == 'push' && github.ref == github.base_ref
