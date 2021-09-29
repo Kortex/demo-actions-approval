@@ -16,6 +16,9 @@ jobs:
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
             #base_ref= echo $GITHUB_BASE_REF | tr '[:upper:]' '[:lower:]'
 
+            echo $GITHUB_BASE_REF
+            echo $GITHUB_HEAD_REF
+
             if [[ $GITHUB_BASE_REF == 'stage/dev' && $GITHUB_HEAD_REF != 'stage/test' ]]; then
               echo "PRs originating from the dev branch should only target the test branch"
               exit 1
