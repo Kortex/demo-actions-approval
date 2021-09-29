@@ -33,4 +33,5 @@ jobs:
               exit 1
             fi
           fi
+
         id: branch_consistency
