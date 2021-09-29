@@ -33,7 +33,7 @@ jobs:
         run: echo $GITHUB_BASE_REF
 
       - name: Echo Head Base
-        run: echo GITHUB_BASE_REF
+        run: echo $GITHUB_BASE_REF
 
       - name: Echo calc branch
         run: echo ${{ env.CALC_BRANCH }}
