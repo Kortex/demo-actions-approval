@@ -29,15 +29,22 @@ jobs:
       - name: Echo branch name
         run: echo ${GITHUB_REF##*/}
 
-      - name: Echo Branch Base
-        run: echo $GITHUB_BASE_REF
+      - name: Echo GITHUB Ref
+        run: echo $GITHUB_REF
 
-      - name: Echo Head Base
-        run: echo GITHUB_BASE_REF
+      - name: Echo Branch Base Parsed
+        run: |
+          echo $GITHUB_BASE_REF
+          echo ${GITHUB_BASE_REF##*/}
 
-      - name: Echo calc branch
-        run: echo ${{ env.CALC_BRANCH }}
+      - name: Echo Head Base Parsed
+        run: |
+          echo $GITHUB_HEAD_REF
+          echo ${GITHUB_HEAD_REF##*/}
+
+#      - name: Echo calc branch
+#        run: echo ${{ env.CALC_BRANCH }}
 
       - name: Do important stuff only for branch
         run: echo "Something very important here"
-        if: github.event_name == 'push' && github.ref == env.CALC_BRANCH
+        if: github.event_name == 'push' && github.ref == github.base_ref
