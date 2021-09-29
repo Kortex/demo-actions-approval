@@ -3,9 +3,10 @@ name: Branch naming test
 on:
   push:
     branches:
-      - stage/dev
-      - stage/test
+      - stage/**
   pull_request:
+    branches:
+      - stage/**
 
 jobs:
   limit-to-certain-branch:
