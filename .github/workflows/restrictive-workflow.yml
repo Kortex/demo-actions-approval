@@ -1,0 +1,34 @@
+name: Branch restriction workflow
+
+on:
+  pull_request:
+    branches:
+      - stage/**
+
+jobs:
+  restrict-ci:
+    name: 'Branch restriction check'
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check branch consistency
+        run: |
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+            if [[ $GITHUB_HEAD_REF == 'stage/dev' && $GITHUB_BASE_REF != 'stage/test' ]]; then
+              echo "PRs originating from the dev branch should only target the test branch"
+              exit 1
+            fi
+
+            if [[ $GITHUB_HEAD_REF == 'stage/test' && $GITHUB_BASE_REF != 'stage/prod' ]]; then
+              echo "PRs originating from the test branch should only target the prod branch"
+              exit 1
+            fi
+
+            if [[ $GITHUB_HEAD_REF =~ "feature/"  || $GITHUB_HEAD_REF =~ "bugfix/" ]] && [[ $GITHUB_BASE_REF != 'stage/dev' ]]; then
+              echo "PRs originating feature or bugix branches should target only the dev branch"
+              exit 1
+            fi
+          fi
+        id: branch_consistency

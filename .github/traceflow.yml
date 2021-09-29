@@ -1,0 +1,180 @@
+#name: 'Traceflow Terraform'
+#
+#on:
+#  push:
+#    branches:
+#      - stage/dev
+#      - stage/test
+#      - stage/prod
+#  pull_request:
+#
+#jobs:
+#  # Job responsible for handling Azure infrastructure
+#  azure-terraform:
+#    name: 'Azure Terraform'
+#    runs-on: ubuntu-20.04
+#
+#    defaults:
+#      run:
+#        shell: bash
+#        working-directory: ./terraform/staged/azure
+#
+#    # Align stages with the branch naming pattern
+#    strategy:
+#      max-parallel: 1
+#      matrix:
+#        stage: [ dev, test, prod ]
+#
+#    steps:
+#
+#      # Checkout project
+#      - name: Checkout Project
+#        uses: actions/checkout@v2
+#        id: p_checkout
+#
+#      # Setup terraform action here
+#      - name: Terraform Setup
+#        uses: hashicorp/setup-terraform@v1
+#        id: tf_setup
+#
+#      # Setup environment (needs to be done dynamically)
+#      - name: Setup environment
+#        run: |
+#          # Common env
+#          echo "ARM_TENANT_ID=${{ secrets.TENANT_ID }}" >> "$GITHUB_ENV"
+#          # Compute branch name
+#          echo "CALC_BRANCH=refs/heads/stage/${{ matrix.stage }}" >> "$GITHUB_ENV"
+#          echo "TF_VAR_tenant_id=${{ secrets.TENANT_ID }}" >> "$GITHUB_ENV"
+#          # Dev specific env
+#          if [[ ${{ matrix.stage }} == dev ]]; then
+#            echo "ARM_CLIENT_ID=${{ secrets.DEV_TF_CLIENT_ID }}" >> "$GITHUB_ENV"
+#            echo "ARM_CLIENT_SECRET=${{ secrets.DEV_TF_CLIENT_SECRET }}" >> "$GITHUB_ENV"
+#            echo "ARM_SUBSCRIPTION_ID=${{ secrets.DEV_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+#            echo "ARM_ACCESS_KEY=${{ secrets.DEV_TF_STATE_ACCESS_KEY }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_server_cert_key_pem_base64=${{ secrets.DEV_CERT_KEY_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_server_cert_chain_pem_base64=${{ secrets.DEV_CERT_CHAIN_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_client_cert_ca_pem_base64=${{ secrets.DEV_CLIENT_CERT_CA_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#          # Test specific env
+#          elif [[ ${{ matrix.stage }} == test ]]; then
+#            echo "ARM_CLIENT_ID=${{ secrets.TEST_TF_CLIENT_ID }}" >> "$GITHUB_ENV"
+#            echo "ARM_CLIENT_SECRET=${{ secrets.TEST_TF_CLIENT_SECRET }}" >> "$GITHUB_ENV"
+#            echo "ARM_SUBSCRIPTION_ID=${{ secrets.TEST_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+#            echo "ARM_ACCESS_KEY=${{ secrets.TEST_TF_STATE_ACCESS_KEY }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_server_cert_key_pem_base64=${{ secrets.TEST_CERT_KEY_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_server_cert_chain_pem_base64=${{ secrets.TEST_CERT_CHAIN_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_client_cert_ca_pem_base64=${{ secrets.TEST_CLIENT_CERT_CA_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#          # Prod specific env
+#          elif [[ ${{ matrix.stage }} == prod ]]; then
+#            echo "ARM_CLIENT_ID=${{ secrets.PROD_TF_CLIENT_ID }}" >> "$GITHUB_ENV"
+#            echo "ARM_CLIENT_SECRET=${{ secrets.PROD_TF_CLIENT_SECRET }}" >> "$GITHUB_ENV"
+#            echo "ARM_SUBSCRIPTION_ID=${{ secrets.PROD_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+#            echo "ARM_ACCESS_KEY=${{ secrets.PROD_TF_STATE_ACCESS_KEY }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_server_cert_key_pem_base64=${{ secrets.PROD_CERT_KEY_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_server_cert_chain_pem_base64=${{ secrets.PROD_CERT_CHAIN_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_client_cert_ca_pem_base64=${{ secrets.PROD_CLIENT_CERT_CA_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#          # Failsafe
+#          else
+#            echo "Cannot setup environment for unknown stage {{ matrix.stage }}"
+#            exit 1
+#          fi
+#        id: env_setup
+#
+#      # Configure the correct backend for each stage
+#      - name: Terraform Backend Config
+#        run: cp vars/${{ matrix.stage }}.tf backend.tf
+#        id: tf_backend_config
+#
+#      # Initialize terraform
+#      - name: Terraform Init
+#        run: terraform init -no-color
+#        id: tf_init
+#
+#      # Validate file consistency
+#      - name: Terraform Validate
+#        run: terraform validate -no-color
+#        id: tf_validate
+#
+#      # Do a terraform plan
+#      - name: Terraform Plan
+#        run: terraform plan -var-file=vars/${{ matrix.stage }}.tfvars -no-color -input=false -out=${{ matrix.stage }}tfplan
+#        id: tf_plan
+#
+##      # Apply the created plan
+##      - name: Terraform Apply
+##        run: terraform apply -auto-approve -no-color -input=false ${{ matrix.stage }}tfplan
+##        id: tf_apply
+##        if: ${{ false }} #TODO disabled for now
+#
+#
+#  ################################# BOUNDARY ####################################
+#
+#  #Job responsible for handling Boundary configuration
+#  boundary-terraform:
+#      name: 'Boundary Terraform'
+#      runs-on: ubuntu-20.04
+#      needs: azure-terraform
+#
+#      defaults:
+#        run:
+#          shell: bash
+#          working-directory: ./terraform/staged/boundary
+#
+#      # Align stages with the branch naming pattern
+#      strategy:
+#        max-parallel: 1
+#        matrix:
+#          stage: [ dev, test, prod ]
+#
+#        # Checkout project
+#        - name: Checkout Project
+#          uses: actions/checkout@v2
+#          id: p_checkout
+#
+#        # Setup terraform action here
+#        - name: Terraform Setup
+#          uses: hashicorp/setup-terraform@v1
+#          id: tf_setup
+#
+#        # Setup environment (needs to be done dynamically)
+#        - name: Setup environment
+#          run: |
+#            # Common env
+#            echo "ARM_TENANT_ID=${{ secrets.TENANT_ID }}" >> "$GITHUB_ENV"
+#            # Compute branch name
+#            echo "CALC_BRANCH=refs/heads/stage/${{ matrix.stage }}" >> "$GITHUB_ENV"
+#            echo "TF_VAR_tenant_id=${{ secrets.TENANT_ID }}" >> "$GITHUB_ENV"
+#            # Dev specific env
+#            if [[ ${{ matrix.stage }} == dev ]]; then
+#              echo "ARM_CLIENT_ID=${{ secrets.DEV_TF_CLIENT_ID }}" >> "$GITHUB_ENV"
+#              echo "ARM_CLIENT_SECRET=${{ secrets.DEV_TF_CLIENT_SECRET }}" >> "$GITHUB_ENV"
+#              echo "ARM_SUBSCRIPTION_ID=${{ secrets.DEV_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+#              echo "ARM_ACCESS_KEY=${{ secrets.DEV_TF_STATE_ACCESS_KEY }}" >> "$GITHUB_ENV"
+#              echo "TF_VAR_server_cert_key_pem_base64=${{ secrets.DEV_CERT_KEY_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#              echo "TF_VAR_server_cert_chain_pem_base64=${{ secrets.DEV_CERT_CHAIN_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#              echo "TF_VAR_client_cert_ca_pem_base64=${{ secrets.DEV_CLIENT_CERT_CA_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#            # Test specific env
+#            elif [[ ${{ matrix.stage }} == test ]]; then
+#              echo "ARM_CLIENT_ID=${{ secrets.TEST_TF_CLIENT_ID }}" >> "$GITHUB_ENV"
+#              echo "ARM_CLIENT_SECRET=${{ secrets.TEST_TF_CLIENT_SECRET }}" >> "$GITHUB_ENV"
+#              echo "ARM_SUBSCRIPTION_ID=${{ secrets.TEST_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+#              echo "ARM_ACCESS_KEY=${{ secrets.TEST_TF_STATE_ACCESS_KEY }}" >> "$GITHUB_ENV"
+#              echo "TF_VAR_server_cert_key_pem_base64=${{ secrets.TEST_CERT_KEY_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#              echo "TF_VAR_server_cert_chain_pem_base64=${{ secrets.TEST_CERT_CHAIN_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#              echo "TF_VAR_client_cert_ca_pem_base64=${{ secrets.TEST_CLIENT_CERT_CA_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#            # Prod specific env
+#            elif [[ ${{ matrix.stage }} == prod ]]; then
+#              echo "ARM_CLIENT_ID=${{ secrets.PROD_TF_CLIENT_ID }}" >> "$GITHUB_ENV"
+#              echo "ARM_CLIENT_SECRET=${{ secrets.PROD_TF_CLIENT_SECRET }}" >> "$GITHUB_ENV"
+#              echo "ARM_SUBSCRIPTION_ID=${{ secrets.PROD_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+#              echo "ARM_ACCESS_KEY=${{ secrets.PROD_TF_STATE_ACCESS_KEY }}" >> "$GITHUB_ENV"
+#              echo "TF_VAR_server_cert_key_pem_base64=${{ secrets.PROD_CERT_KEY_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#              echo "TF_VAR_server_cert_chain_pem_base64=${{ secrets.PROD_CERT_CHAIN_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#              echo "TF_VAR_client_cert_ca_pem_base64=${{ secrets.PROD_CLIENT_CERT_CA_PEM_BASE64 }}" >> "$GITHUB_ENV"
+#            # Failsafe
+#            else
+#              echo "Cannot setup environment for unknown stage {{ matrix.stage }}"
+#              exit 1
+#            fi
+#          id: env_setup
+#
+#
