@@ -43,9 +43,22 @@ jobs:
           echo $GITHUB_HEAD_REF
           echo ${GITHUB_HEAD_REF##*/}
 
+      - name: Figure out stage name
+        run: |
+          stage=
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]];
+            stage=${GITHUB_BASE_REF##*/}
+          elif [[ $GITHUB_EVENT_NAME == 'push' ]];
+            stage=${GITHUB_REF##*/}
+          else
+            echo "Cannot figure out stage"
+            exit 2
+          fi
+          echo $stage
+          echo "STAGE=$stage" >> "$GITHUB_ENV"
 #      - name: Echo calc branch
 #        run: echo ${{ env.CALC_BRANCH }}
 
       - name: Do important stuff only for branch
-        run: echo "Something very important here"
+        run: echo "Something very important here {{ env.STAGE }}"
         if: github.event_name == 'push' && github.ref == github.base_ref
