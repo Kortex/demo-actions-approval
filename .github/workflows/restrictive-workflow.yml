@@ -13,7 +13,6 @@ jobs:
     steps:
       - name: Check branch consistency
         run: |
-          ok=
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
             base_ref= echo $GITHUB_BASE_REF | tr '[:upper:]' '[:lower:]'
 
@@ -31,5 +30,6 @@ jobs:
               echo "PRs originating feature or bugix branches should target only the dev branch"
               exit 1
             fi
+          fi
 
         id: branch_consistency
