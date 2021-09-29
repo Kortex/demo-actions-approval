@@ -15,16 +15,21 @@ jobs:
         run: |
           ok=
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-            echo $GITHUB_BASE_REF
-            echo $GITHUB_HEAD_REF
-          else
-            echo "Got triggered from unrelated event"
-          fi
+            base_ref= echo $GITHUB_BASE_REF | tr '[:upper:]' '[:lower:]'
 
-          exit 2
+            if [[ $base_ref == 'stage/dev' && $GITHUB_HEAD_REF != 'stage/test' ]]; then
+              echo "PRs originating from the dev branch should only target the test branch"
+              exit 1
+            fi
 
-          if [[ -n $ok ]]; then
+            if [[ $base_ref == 'stage/test' && $GITHUB_HEAD_REF != 'stage/prod' ]]; then
+              echo "PRs originating from the test branch should only target the prod branch"
+              exit 1
+            fi
 
-          fi
+            if [[ $base_ref =~ "feature/"  || $base_ref =~ "bugfix/" ]] && [[ $GITHUB_HEAD_REF != 'stage/dev' ]]; then
+              echo "PRs originating feature or bugix branches should target only the dev branch"
+              exit 1
+            fi
 
         id: branch_consistency
