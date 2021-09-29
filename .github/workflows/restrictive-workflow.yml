@@ -14,19 +14,19 @@ jobs:
       - name: Check branch consistency
         run: |
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-            base_ref= echo $GITHUB_BASE_REF | tr '[:upper:]' '[:lower:]'
+            #base_ref= echo $GITHUB_BASE_REF | tr '[:upper:]' '[:lower:]'
 
-            if [[ $base_ref == 'stage/dev' && $GITHUB_HEAD_REF != 'stage/test' ]]; then
+            if [[ $GITHUB_BASE_REF == 'stage/dev' && $GITHUB_HEAD_REF != 'stage/test' ]]; then
               echo "PRs originating from the dev branch should only target the test branch"
               exit 1
             fi
 
-            if [[ $base_ref == 'stage/test' && $GITHUB_HEAD_REF != 'stage/prod' ]]; then
+            if [[ $GITHUB_BASE_REF == 'stage/test' && $GITHUB_HEAD_REF != 'stage/prod' ]]; then
               echo "PRs originating from the test branch should only target the prod branch"
               exit 1
             fi
 
-            if [[ $base_ref =~ "feature/"  || $base_ref =~ "bugfix/" ]] && [[ $GITHUB_HEAD_REF != 'stage/dev' ]]; then
+            if [[ $GITHUB_BASE_REF =~ "feature/"  || $base_ref =~ "bugfix/" ]] && [[ $GITHUB_HEAD_REF != 'stage/dev' ]]; then
               echo "PRs originating feature or bugix branches should target only the dev branch"
               exit 1
             fi
