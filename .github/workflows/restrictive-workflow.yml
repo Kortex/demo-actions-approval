@@ -1,0 +1,30 @@
+name: Branch restriction workflow
+
+on:
+  pull_request:
+
+jobs:
+  restrict-ci:
+    name: 'Branch restriction check'
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check branch consistency
+        run: |
+          ok=
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+            echo $GITHUB_BASE_REF
+            echo $GITHUB_HEAD_REF
+          else
+            echo "Got triggered from unrelated event"
+          fi
+
+          exit 2
+
+          if [[ -n $ok ]]; then
+
+          fi
+
+        id: branch_consistency
