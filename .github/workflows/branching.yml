@@ -29,6 +29,8 @@ jobs:
           echo "head ref: $GITHUB_HEAD_REF"
           echo "ref name: $GITHUB_REF_NAME"
 
+          git branch -a --contains $GITHUB_SHA
+
           echo "COMMIT MESSAGE: ${{ github.event.head_commit.message }}"
           user=
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
