@@ -28,7 +28,7 @@ jobs:
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
             user=${GITHUB_HEAD_REF##*/}
           elif [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-            user=echo $commit_msg | grep -o 'team/.*' | cut -f2- -d/
+            user=$(echo $commit_msg | grep -o 'team/.*' | cut -f2- -d/)
           else
             echo "Cannot figure out username"
             exit 2
