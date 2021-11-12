@@ -28,6 +28,8 @@ jobs:
           echo "ref: $GITHUB_REF"
           echo "head ref: $GITHUB_HEAD_REF"
           echo "ref name: $GITHUB_REF_NAME"
+
+          echo "COMMIT MESSAGE: ${{ github.event.head_commit.message }}"
           user=
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
             user=${GITHUB_HEAD_REF##*/}
