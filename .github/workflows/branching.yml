@@ -23,7 +23,7 @@ jobs:
 
       - name: 'Environment setup'
         run: |
-          printenv
+          printenv| sort
           echo "base ref: $GITHUB_BASE_REF"
           echo "ref: $GITHUB_REF"
           echo "head ref: $GITHUB_HEAD_REF"
