@@ -23,7 +23,7 @@ jobs:
 
       - name: 'Environment setup'
         run: |
-          commit_msg=${{ github.event.head_commit.message }}
+          commit_msg="${{ github.event.head_commit.message }}"
           user=
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
             user=${GITHUB_HEAD_REF##*/}
