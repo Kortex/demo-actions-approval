@@ -1,0 +1,42 @@
+name: 'Go Training'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  go-training-ci:
+    name: 'Go Training Pipeline'
+
+    runs-on: ubuntu-20.04
+
+    steps:
+
+      - name: 'Checkout Project'
+        uses: actions/checkout@v2
+        id: p_checkout
+
+      - name: 'Environment setup'
+        run: |
+          echo "base ref: $GITHUB_BASE_REF"
+          echo "ref: $GITHUB_REF"
+          echo "head ref: $GITHUB_HEAD_REF"
+          echo "ref name: $GITHUB_REF_NAME"
+          user=
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+            user=${GITHUB_HEAD_REF##*/}
+          elif [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+            user=${GITHUB_REF##*/}
+          else
+            echo "Cannot figure out username"
+            exit 2
+          fi
+          echo "Running for user: $user"
+          echo "TEAM_MEMBER_NAME=$user" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${{ secrets.REGISTRY_LOGIN_SERVER }}/$user:latest" >> "$GITHUB_ENV"
+        id: env_setup
